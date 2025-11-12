@@ -21,6 +21,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
 
+
   app:
     build: .
     container_name: spring-app-container

@@ -11,6 +11,11 @@ public class HospitalAppointmentSystemApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(HospitalAppointmentSystemApplication.class, args);
 
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+		String pass = "bob23";
+		// Generate the hash
+		String hashedPassword = encoder.encode(pass);
 
 	}
 }
