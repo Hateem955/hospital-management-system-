@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:latest
+    container_name: mysql-container
+    ports:
+      - "3307:3306"
+    networks:
+      -  my-network
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}" ]
+      timeout: 10s
+      retries: 5
+      interval: 10s
+      start_period: 20s
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: spring-app-container
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+    env_file: .env
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

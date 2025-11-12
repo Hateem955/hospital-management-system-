@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-input, .form-button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+        }
+        .form-button {
+            background-color: #4f46e5;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .form-button:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Hospital Appointment System</h1>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="space-y-4 hidden">
+        <h2 class="text-2xl font-semibold text-center text-gray-700">Admin Dashboard</h2>
+        <button id="register-button" class="form-button">Register a User</button>
+        <button class="form-button bg-gray-500 hover:bg-gray-600">Book Appointment</button>
+        <button class="form-button bg-gray-500 hover:bg-gray-600">View Doctors</button>
+        <button class="form-button bg-gray-500 hover:bg-gray-600">Create Time Slots</button>
+        <button id="logout-button" class="form-button bg-red-500 hover:bg-red-600">Logout</button>
+    </div>
+
+    <!-- Doctor Dashboard -->
+    <div id="doctor-dashboard" class="space-y-4 hidden">
+        <h2 class="text-2xl font-semibold text-center text-gray-700">Doctor Dashboard</h2>
+        <button class="form-button bg-blue-500 hover:bg-blue-600">View My Appointments</button>
+        <button class="form-button bg-green-500 hover:bg-green-600">Approve Appointments</button>
+        <button id="logout-button-doctor" class="form-button bg-red-500 hover:bg-red-600">Logout</button>
+    </div>
+
+    <!-- Patient Dashboard -->
+    <div id="patient-dashboard" class="space-y-4 hidden">
+        <h2 class="text-2xl font-semibold text-center text-gray-700">Patient Dashboard</h2>
+        <button class="form-button">Book an Appointment</button>
+        <button class="form-button bg-gray-500 hover:bg-gray-600">View My Appointments</button>
+        <button id="logout-button-patient" class="form-button bg-red-500 hover:bg-red-600">Logout</button>
+    </div>
+
+    <div id="role-selection" class="hidden space-y-4 mt-4">
+        <p class="text-center text-gray-600">Select a role to register:</p>
+        <button id="register-patient-btn" class="form-button">Register Patient</button>
+        <button id="register-doctor-btn" class="form-button">Register Doctor</button>
+        <button id="register-admin-btn" class="form-button">Register Admin</button>
+        <button id="back-to-menu-btn" class="form-button bg-gray-500 hover:bg-gray-600">Back to Menu</button>
+    </div>
+
+    <div id="register-form-container" class="hidden mt-4">
+        <h2 class="text-2xl font-semibold mb-4 text-center" id="form-title">Register User</h2>
+        <form id="register-form" class="space-y-4">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="username" class="form-input" required>
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="password" class="form-input" required>
+            </div>
+            <button type="submit" class="form-button" id="submit-reg-btn">Register</button>
+        </form>
+        <p id="message" class="text-center mt-4"></p>
+        <button id="reg-form-back-btn" class="form-button bg-gray-500 hover:bg-gray-600">Back</button>
+    </div>
+
+    <div id="details-form-container" class="hidden mt-4">
+        <h2 class="text-2xl font-semibold mb-4 text-center">Set User Details</h2>
+        <form id="details-form" class="space-y-4"></form>
+        <button id="details-form-back-btn" class="form-button bg-gray-500 hover:bg-gray-600">Back</button>
+    </div>
+</div>
+
+<script>
+    // Store the token and role from localStorage
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+
+    const logoutButtons = [
+        document.getElementById('logout-button'),
+        document.getElementById('logout-button-doctor'),
+        document.getElementById('logout-button-patient')
+    ];
+
+    logoutButtons.forEach(button => {
+        if (button) {
+            button.addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('role');
+                window.location.href = 'login.html';
+            });
+        }
+    });
+
+    function displayDashboard() {
+        const allDashboards = ['admin-dashboard', 'doctor-dashboard', 'patient-dashboard'];
+        allDashboards.forEach(id => document.getElementById(id).classList.add('hidden'));
+
+        if (role === 'ROLE_ADMIN') {
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+        } else if (role === 'ROLE_DOCTOR') {
+            document.getElementById('doctor-dashboard').classList.remove('hidden');
+        } else if (role === 'ROLE_PATIENT') {
+            document.getElementById('patient-dashboard').classList.remove('hidden');
+        } else {
+            // If role is unknown, display a message
+            const container = document.querySelector('.container');
+            container.innerHTML = `
+                <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Hospital Appointment System</h1>
+                <div class="space-y-4">
+                    <p class="text-center text-gray-600">Unknown Role. Please log in again.</p>
+                    <button id="logout-button-unknown" class="form-button bg-red-500 hover:bg-red-600">Logout</button>
+                </div>
+            `;
+             document.getElementById('logout-button-unknown').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('role');
+                window.location.href = 'login.html';
+            });
+        }
+    }
+
+    // Display the correct dashboard on page load
+    displayDashboard();
+
+    document.getElementById('register-button').addEventListener('click', () => {
+        document.getElementById('admin-dashboard').classList.add('hidden');
+        document.getElementById('role-selection').classList.remove('hidden');
+    });
+
+    const roleButtons = {
+        'register-patient-btn': 'patient',
+        'register-doctor-btn': 'doctor',
+        'register-admin-btn': 'admin'
+    };
+
+    let currentRole = '';
+
+    Object.keys(roleButtons).forEach(id => {
+        document.getElementById(id).addEventListener('click', () => {
+            currentRole = roleButtons[id];
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('form-title').textContent = `Register ${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}`;
+            document.getElementById('register-form-container').classList.remove('hidden');
+        });
+    });
+
+    document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+        document.getElementById('role-selection').classList.add('hidden');
+        displayDashboard();
+    });
+
+    document.getElementById('reg-form-back-btn').addEventListener('click', () => {
+        document.getElementById('register-form-container').classList.add('hidden');
+        document.getElementById('role-selection').classList.remove('hidden');
+    });
+
+    document.getElementById('details-form-back-btn').addEventListener('click', () => {
+        document.getElementById('details-form-container').classList.add('hidden');
+        displayDashboard();
+    });
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const messageEl = document.getElementById('message');
+
+        const loginAndRegisterDTO = {
+            username: username,
+            password: password
+        };
+
+        messageEl.textContent = 'Registering user...';
+        messageEl.className = 'text-center mt-4 text-gray-500';
+
+        try {
+            const response = await fetch(`http://localhost:8080/register/${currentRole}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(loginAndRegisterDTO)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Registration failed: ${errorText}`);
+            }
+
+            const result = await response.json();
+            const userId = result.userId;
+
+            messageEl.textContent = 'Registration successful! Now set user details.';
+            messageEl.className = 'text-center mt-4 text-green-500';
+
+            renderUserDetailForm(currentRole, userId);
+        } catch (error) {
+            console.error('Error during registration:', error);
+            messageEl.textContent = `Error: ${error.message}`;
+            messageEl.className = 'text-center mt-4 text-red-500';
+        }
+    });
+
+    function renderUserDetailForm(role, userId) {
+        document.getElementById('register-form-container').classList.add('hidden');
+        const detailsFormContainer = document.getElementById('details-form-container');
+        const detailsForm = document.getElementById('details-form');
+        detailsForm.innerHTML = '';
+
+        let htmlContent = '';
+        let formTitle = '';
+
+        switch(role) {
+            case 'patient':
+                formTitle = 'Set Patient Details';
+                htmlContent = `
+                    <div>
+                        <label for="patientName" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="patientName" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="emailAddress" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="emailAddress" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
+                        <input type="number" id="age" class="form-input" required>
+                    </div>
+                `;
+                break;
+            case 'doctor':
+                formTitle = 'Set Doctor Details';
+                htmlContent = `
+                    <div>
+                        <label for="doctorName" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="doctorName" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
+                        <input type="text" id="specialization" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="yearsOfExperience" class="block text-sm font-medium text-gray-700">Years of Experience</label>
+                        <input type="number" id="yearsOfExperience" class="form-input" required>
+                    </div>
+                `;
+                break;
+            case 'admin':
+                formTitle = 'Admin Details (Optional)';
+                htmlContent = `<p class="text-center text-gray-500">Admin details are optional. You can skip this step.</p>`;
+                break;
+        }
+
+        detailsForm.innerHTML = htmlContent + `
+            <button type="submit" class="form-button">Submit Details</button>
+        `;
+        document.getElementById('details-form-container').querySelector('h2').textContent = formTitle;
+        detailsFormContainer.classList.remove('hidden');
+
+        detailsForm.addEventListener('submit', (e) => updateUserDetail(e, userId, role));
+    }
+
+    async function updateUserDetail(e, userId, role) {
+        e.preventDefault();
+
+        let details = {};
+        let endpoint = '';
+
+        if (role === 'patient') {
+            details = {
+                name: document.getElementById('patientName').value,
+                emailAddress: document.getElementById('emailAddress').value,
+                age: document.getElementById('age').value
+            };
+            endpoint = `setPatientDetails/${userId}`;
+        } else if (role === 'doctor') {
+            details = {
+                name: document.getElementById('doctorName').value,
+                specialization: document.getElementById('specialization').value,
+                yearsOfExperience: document.getElementById('yearsOfExperience').value
+            };
+            endpoint = `setDoctorDetails/${userId}`;
+        } else {
+            // No details to submit for admin, just return
+            window.location.reload();
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/register/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(details)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Backend Error Response:', errorText);
+                throw new Error(`Failed to set details: ${errorText}`);
+            }
+
+            alert('Details saved successfully!');
+            window.location.reload(); // Reload the page after successful submission
+        } catch (error) {
+            console.error('Error saving details:', error);
+            alert('Error saving details: ' + error.message);
+        }
+    }
+</script>
+</body>
+</html>

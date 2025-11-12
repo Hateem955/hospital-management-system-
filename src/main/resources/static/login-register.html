@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Appointment System - Login/Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+<!-- Login/Register Container -->
+<div id="formContainer" class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8">
+    <div class="text-center space-y-4">
+        <h2 id="formTitle" class="text-3xl font-bold text-gray-800">Login</h2>
+        <p id="messageBox" class="text-sm font-medium text-red-500 hidden"></p>
+    </div>
+
+    <div class="mt-6 space-y-4">
+        <input type="text" id="username" placeholder="Username" class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+        <input type="password" id="password" placeholder="Password" class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+        <button id="submitButton" onclick="submitForm()" class="w-full p-3 mt-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition duration-200">Login</button>
+    </div>
+
+    <div class="mt-6 text-center">
+        <button onclick="toggleForm()" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition duration-200">Don't have an account? Register</button>
+    </div>
+</div>
+
+<script>
+    let isLogin = true;
+    const formTitle = document.getElementById("formTitle");
+    const submitButton = document.getElementById("submitButton");
+    const messageBox = document.getElementById("messageBox");
+    const toggleButton = document.querySelector(".mt-6.text-center button");
+
+    function showMessage(msg, isError = true) {
+        messageBox.textContent = msg;
+        messageBox.classList.remove('hidden');
+        messageBox.classList.add(isError ? 'text-red-500' : 'text-green-500');
+        setTimeout(() => {
+            messageBox.classList.add('hidden');
+        }, 5000);
+    }
+
+    function toggleForm() {
+        isLogin = !isLogin;
+        formTitle.innerText = isLogin ? "Login" : "Register";
+        submitButton.innerText = isLogin ? "Login" : "Register";
+        toggleButton.innerText = isLogin
+            ? "Don't have an account? Register"
+            : "Already have an account? Login";
+        showMessage("", false);
+    }
+
+    async function submitForm() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+            showMessage("Please enter both username and password.");
+            return;
+        }
+
+        const dto = { username, password };
+        const url = isLogin ? "http://localhost:8080/login" : "http://localhost:8080/register/patient";
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dto)
+            });
+
+            if (!isLogin) {
+                const msg = await response.text();
+                showMessage(msg, response.ok);
+                return;
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Received data from server:", data);
+                if (data && data.token && data.role) {
+                    const formattedRole = data.role.toUpperCase().replace("ROLE_", "");
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("role", formattedRole);
+                    window.location.href = "dashboard.html";
+                } else {
+                    showMessage("Invalid server response. Missing token or role.");
+                }
+            } else {
+                const errorMsg = await response.text();
+                showMessage("Login failed: " + errorMsg);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            showMessage("Could not connect to the server.");
+        }
+    }
+</script>
+</body>
+</html>
