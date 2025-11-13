@@ -9,3 +9,6 @@ INSERT INTO doctor (doc_id, name, specialization, years_of_experience, user_id) 
 INSERT INTO time_slot (id, end_time, is_booked, start_time, doc_id) VALUES
 (1, '2025-12-01 10:00:00', FALSE, '2025-12-01 09:00:00', 1),
 (2,  '2025-12-01 11:00:00', FALSE, '2025-12-01 10:00:00', 2);
+
+INSERT INTO app_user (user_id, password, role, username) VALUES
+(1, '$2a$10$v2QXPTKqiT94hUG4f.AO6.Y1BtGTC13T6mYBldluAgWeawCr6OfhG', 'ROLE_ADMIN', 'admin');
