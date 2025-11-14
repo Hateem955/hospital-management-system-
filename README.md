@@ -4,6 +4,26 @@
 
 This is a robust **Hospital** **Appointment** **System** built using **Spring Boot** and secured with **JSON Web Tokens (JWT)**. It provides a complete set of RESTful APIs for patient registration, doctor listing, and appointment management.
 
+## 🌐 Live Demo (Railway Cloud Deployment)
+
+**Want to test the API without any local setup?** Use our live cloud deployment!
+
+### Base URL:
+```
+    Full URL: https://hospital-management-system-production-195e.up.railway.app
+    Short URL: https://tinyurl.com/zmezvadp
+```
+
+### 📮 Testing with Postman:
+Simply replace `http://localhost:8080` with the Railway URL in all endpoints.
+
+**Example:**
+```
+POST https://https://tinyurl.com/zmezvadp/register/patient
+POST https://https://tinyurl.com/zmezvadp/login
+GET https://https://tinyurl.com/zmezvadp/doctors
+```
+
 ## **🛠️ Technology Stack**
 
 - **Backend Framework**: Spring Boot
