@@ -11,7 +11,6 @@ This is a robust **Hospital** **Appointment** **System** built using **Spring Bo
 ### Base URL:
 ```
     Full URL: https://hospital-management-system-production-195e.up.railway.app
-    Short URL: https://tinyurl.com/zmezvadp
 ```
 
 ### 📮 Testing with Postman:
